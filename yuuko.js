@@ -1,7 +1,7 @@
 let config = require('./config.json')
 let guilds = require('./guilds.json')
 let commands = require('./commands.js')
-let events = require('./gh-events.js')
+let ghEvents = require('./gh-events.js')
 
 let fs = require('fs')
 let reload = require('require-reload')(require)
@@ -20,8 +20,8 @@ let pastebinApi = require("pastebin-js"),
 c.reply = (msg, content, file) => c.createMessage(msg.channel.id, content, file) // Reply to a message directly
 c.reloadGuilds = () => guilds = reload('./guilds.json') // Reload the guild config
 c.reloadCommands = () => commands = reload('./commands.js') // Reload the bot's commands
-c.reloadGuilds = () => {
-    guilds = reload('./guilds.json')
+c.reloadGhEvents = () => ghEvents = reload('./gh-events.js') // Reload the GitHub webhook events
+
 c.requireOwner = (msg) => {
     let result = config.ownerIds.includes(msg.author.id)
     if (!result) c.reply(msg, "Sorry, gotta be an owner to do that.")
@@ -88,9 +88,9 @@ server.post('/ghweb', (req, res) => {
     let guild = c.guilds.find(g => g.id === guildId)
     if (!guild) return res.status(400).send('Could not find specified server')
     let e = req.headers['x-github-event']
-    if (events[e]) {
-        let response = events[e](req.body)
-        let channel = guild.defaultChannel.id
+    if (ghEvents[e]) {
+        let response = ghEvents[e](req.body)
+        let channel = getGuildConfig(guildId).githubChannel || guild.defaultChannel.id
         c.createMessage(channel, response)
         res.status(200).send(response)
     } else {

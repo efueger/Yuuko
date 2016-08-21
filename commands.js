@@ -81,6 +81,7 @@ commands.reload = {
     process: (c, msg, args) => {
         if (c.requireOwner(msg)) {
             c.reloadCommands()
+            c.reloadGhEvents()
             c.reply(msg, 'Reloaded commands and GitHub event messages.')
         }
     }
