@@ -1,4 +1,3 @@
-let config = require('./config.json') // Need this for owner checks
 let request = require('request')
 
 var commands = {}
@@ -80,11 +79,9 @@ commands.reload = {
     usage: '',
     hide: true,
     process: (c, msg, args) => {
-        if (config.ownerIds.includes(msg.author.id)) {
+        if (c.requireOwner(msg)) {
             c.reloadCommands()
-            c.reply(msg, 'Reloaded commands.')
-        } else {
-            c.reply(msg, "Sorry, gotta be an owner to do that.")
+            c.reply(msg, 'Reloaded commands and GitHub event messages.')
         }
     }
 }

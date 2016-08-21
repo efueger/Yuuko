@@ -18,9 +18,14 @@ let pastebinApi = require("pastebin-js"),
 
 // Some convenience functions, extending the client so commands can use them easily (client is passed to commands)
 c.reply = (msg, content, file) => c.createMessage(msg.channel.id, content, file) // Reply to a message directly
+c.reloadGuilds = () => guilds = reload('./guilds.json') // Reload the guild config
 c.reloadCommands = () => commands = reload('./commands.js') // Reload the bot's commands
 c.reloadGuilds = () => {
     guilds = reload('./guilds.json')
+c.requireOwner = (msg) => {
+    let result = config.ownerIds.includes(msg.author.id)
+    if (!result) c.reply(msg, "Sorry, gotta be an owner to do that.")
+    return result
 }
 c.getGuildConfig = guildId => {
     let raw = guilds[guildId] || {}
