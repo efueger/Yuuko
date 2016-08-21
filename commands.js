@@ -87,4 +87,44 @@ commands.reload = {
     }
 }
 
+commands.eval = {
+    name: 'eval',
+    desc: 'Evaluate raw JavaScript from the bot process.',
+    usage: '<code ...>',
+    hide: true,
+    process: (c, msg, args) => {
+        if (c.requireOwner(msg)) c.eval(msg, args)
+    }
+}
+
+commands.setavatar = {
+    name: 'setavatar',
+    desc: "Set the bot's avatar",
+    usage: '<url or file upload>',
+    hide: true,
+    process: (c, msg, args) => {
+        if (c.requireOwner(msg)) {
+            // Get the URL of the image
+            let url = args.split(" ")[0] // URL specified in chat
+            if (msg.attachments[0]) url = msg.attachments[0].url // URL specified by upload
+            url = url.replace(/<([^>]+)>/, '$1') // Allow suppressed URLs
+            if (url === "") return c.reply(msg, 'No image was uploaded or linked.') // Return if no URL
+            // Get the image itself by requesting the URL
+            request.get({url: url, method: 'GET', encoding: null}, (err, res, body) => {
+                // Handle possible errors
+                if (err) return c.reply(msg, 'Error while retrieving avatar: ' + err)
+                else if (res.statusCode !== 200) return c.reply(msg, `Got non-200 response (${res.statusCode} ${res.statusMessage}) while retrieving avatar`)
+                // Edit the avatar
+                c.editSelf({
+                    avatar: `data:${res.headers['content-type']};base64,${body.toString('base64')}`
+                }).then(user => {
+                    c.reply(msg, 'Avatar updated!')
+                }).catch(err => {
+                    c.reply(msg, 'There was an error while uploading the new avatar.')
+                })
+            })
+        }
+    }
+}
+
 module.exports = commands

@@ -18,6 +18,7 @@ let pastebinApi = require("pastebin-js"),
 
 // Some convenience functions, extending the client so commands can use them easily (client is passed to commands)
 c.reply = (msg, content, file) => c.createMessage(msg.channel.id, content, file) // Reply to a message directly
+
 c.reloadGuilds = () => guilds = reload('./guilds.json') // Reload the guild config
 c.reloadCommands = () => commands = reload('./commands.js') // Reload the bot's commands
 c.reloadGhEvents = () => ghEvents = reload('./gh-events.js') // Reload the GitHub webhook events
@@ -27,6 +28,7 @@ c.requireOwner = (msg) => {
     if (!result) c.reply(msg, "Sorry, gotta be an owner to do that.")
     return result
 }
+
 c.getGuildConfig = guildId => {
     let raw = guilds[guildId] || {}
     return merge(config.guildDefaults, raw)
@@ -48,6 +50,7 @@ c.getPrefixFromMessage = msg => {
     if (msg.channel.guild) return c.getGuildConfig(msg.channel.guild.id).prefix
     else return config.guildDefaults.prefix
 }
+
 c.getCommandHelp = (msg, commandName) => { // Get a formatted help message for a command
     let prefix = c.getPrefixFromMessage(msg)
     if (commandName.startsWith(prefix)) commandName = commandName.substr(prefix.length)
@@ -69,6 +72,7 @@ c.getCommandHelp = (msg, commandName) => { // Get a formatted help message for a
         return response
     }
 }
+
 c.pastebinUpload = (title, content, format, callback) => { // Creates a paste; calls back with the link
     pastebin.createPaste({
         title: title,
@@ -79,6 +83,19 @@ c.pastebinUpload = (title, content, format, callback) => { // Creates a paste; c
     }).then(pasteId =>
         callback(null, `http://pastebin.com/${ pasteId }`)
     ).fail(callback)
+}
+
+c.eval = (msg, code) => { // Eval command - moved here because I don't like having this in the command scope
+    // Some eval-specific utilities that I call a lot
+    let guildList = c.guilds.map(guild => `\`${guild.id}\` ${guild.name}`).join('\n')
+    // The actual eval now
+    var result;
+    try {
+        result = eval(code)
+    } catch (e) {
+        result = e
+    }
+    c.reply(msg, result)
 }
 
 // GitHub webhook actions
