@@ -1,9 +1,14 @@
-let reload = require('require-reload')(require)
 let config = require('./config.json')
 let commands = require('./commands.js')
+let events = require('./gh-events.js')
+
+let reload = require('require-reload')(require)
 let chalk = require('chalk')
 let Eris = require('eris'),
     c = new Eris.Client(config.token)
+let express = require('express'),
+    bodyParser = require('body-parser'),
+    server = express().use(bodyParser.json())
 let pastebinApi = require("pastebin-js"),
     pastebin = new pastebinApi(config.apiKeys.pastebin)
 
@@ -50,11 +55,29 @@ c.pastebinUpload = (title, content, format, callback) => { // Creates a paste; c
     ).fail(callback)
 }
 
+// GitHub webhook actions
+server.post('/ghweb', (req, res) => {
+    let guildId = req.query.server
+    if (!guildId) return res.status(400).send('No server specified')
+    let guild = c.guilds.find(g => g.id === guildId)
+    if (!guild) return res.status(400).send('Could not find specified server')
+    let e = req.headers['x-github-event']
+    if (events[e]) {
+        let response = events[e](req.body, c, guild)
+        let channel = guild.defaultChannel.id
+        c.createMessage(channel, response)
+        res.status(200).send(response)
+    } else {
+        res.status(501).send('No action for this event was found')
+    }
+})
+server.listen(3000)
+console.log('GitHub webhook server running on port 3000.');
+
 // Bot actions
 c.on('ready', () => {
-    console.log('Connected!');
+    console.log('Discord bot connected.');
 })
-
 c.on('messageCreate', msg => {
     // Commands
     if (msg.content.startsWith(prefix)) {
@@ -70,5 +93,4 @@ c.on('messageCreate', msg => {
         commands[commandName].process(c, msg, args)
     }
 })
-
 c.connect()
