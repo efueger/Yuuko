@@ -63,7 +63,7 @@ server.post('/ghweb', (req, res) => {
     if (!guild) return res.status(400).send('Could not find specified server')
     let e = req.headers['x-github-event']
     if (events[e]) {
-        let response = events[e](req.body, c, guild)
+        let response = events[e](req.body)
         let channel = guild.defaultChannel.id
         c.createMessage(channel, response)
         res.status(200).send(response)
