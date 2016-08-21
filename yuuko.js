@@ -1,9 +1,12 @@
 let config = require('./config.json')
+let guilds = require('./guilds.json')
 let commands = require('./commands.js')
 let events = require('./gh-events.js')
 
+let fs = require('fs')
 let reload = require('require-reload')(require)
 let chalk = require('chalk')
+let merge = require('merge')
 let Eris = require('eris'),
     c = new Eris.Client(config.token)
 let express = require('express'),
@@ -12,18 +15,36 @@ let express = require('express'),
 let pastebinApi = require("pastebin-js"),
     pastebin = new pastebinApi(config.apiKeys.pastebin)
 
-// Temp global declaration until I'm not lazy and move it to a per-guild config
-var prefix = '~'
 
 // Some convenience functions, extending the client so commands can use them easily (client is passed to commands)
 c.reply = (msg, content, file) => c.createMessage(msg.channel.id, content, file) // Reply to a message directly
 c.reloadCommands = () => commands = reload('./commands.js') // Reload the bot's commands
-c.getPrefixFromMessage = msg => {
-    if (msg.channel.guild) {
-        return guilds[msg.channel.guild.id].prefix
-    }
+c.reloadGuilds = () => {
+    guilds = reload('./guilds.json')
 }
-c.getCommandHelp = (commandName) => { // Get a formatted help message for a command
+c.getGuildConfig = guildId => {
+    let raw = guilds[guildId] || {}
+    return merge(config.guildDefaults, raw)
+}
+c.writeGuildConfig = (guildId, options) => {
+    // Compute new
+    var guildConfig = guilds[guildId] || {}
+    guildConfig = merge(guildConfig, options)
+    var newStuff = {}
+    newStuff[guildId] = guildConfig
+    guilds = merge(guilds, newStuff)
+    // Write to file
+    fs.writeFile('guilds.json', JSON.stringify(guilds), 'utf-8', err => {
+        if (err) console.log(err)
+        c.reloadCommands()
+    })
+}
+c.getPrefixFromMessage = msg => {
+    if (msg.channel.guild) return c.getGuildConfig(msg.channel.guild.id).prefix
+    else return config.guildDefaults.prefix
+}
+c.getCommandHelp = (msg, commandName) => { // Get a formatted help message for a command
+    let prefix = c.getPrefixFromMessage(msg)
     if (commandName.startsWith(prefix)) commandName = commandName.substr(prefix.length)
     var command = commands[commandName]
     if (!command) {
@@ -79,6 +100,7 @@ c.on('ready', () => {
     console.log('Discord bot connected.');
 })
 c.on('messageCreate', msg => {
+    let prefix = c.getPrefixFromMessage(msg)
     // Commands
     if (msg.content.startsWith(prefix)) {
         var split = msg.content.substr(prefix.length).split(' ')

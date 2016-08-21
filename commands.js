@@ -8,7 +8,7 @@ commands.help = {
     desc: 'Gets help for a command. If not passed a command name, gets a list of all commands.',
     usage: '[command]',
     process: (c, msg, args) => {
-        let response = c.getCommandHelp(args)
+        let response = c.getCommandHelp(msg, args)
         c.reply(msg, response)
     }
 }
@@ -58,6 +58,19 @@ commands.request = {
                 })
             }
         })
+    }
+}
+
+commands.prefix = {
+    name: 'prefix',
+    desc: 'Changes the server prefix',
+    usage: '<prefix>',
+    process: (c, msg, args) => {
+        if (!msg.channel.guild) return c.reply(msg, "Can't use that in PM channels.")
+        if (false) return c.reply(msg, 'kjasdf') // todo: perm check here
+        if (/[a-zA-Z0-9\s\n]/.test(args)) return c.reply(msg, "Prefix cannot contain letters, numbers, newlines, or whitespace.")
+        c.writeGuildConfig(msg.channel.guild.id, {prefix: args})
+        c.reply(msg, `Updated prefix to ${args}`)
     }
 }
 
