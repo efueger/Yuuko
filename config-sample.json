@@ -1,0 +1,13 @@
+{
+    "token": "Bot token",
+    "ownerIds": [
+        "Your Discord user ID goes here",
+        "Any user whose ID is in this list will have full access to the bot, including eval - be careful who you add"
+    ],
+    "apiKeys": {
+        "pastebin": "Pastebin API key"
+    },
+    "guildDefaults": {
+        "prefix": "$$"
+    }
+}
