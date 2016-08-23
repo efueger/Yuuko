@@ -104,12 +104,17 @@ server.post('/ghweb', (req, res) => {
     if (!guildId) return res.status(400).send('No server specified')
     let guild = c.guilds.find(g => g.id === guildId)
     if (!guild) return res.status(400).send('Could not find specified server')
+    let channel = c.getGuildConfig(guildId).githubChannel || guild.defaultChannel.id
     let e = req.headers['x-github-event']
     if (ghEvents[e]) {
-        let response = ghEvents[e](req.body)
-        let channel = getGuildConfig(guildId).githubChannel || guild.defaultChannel.id
-        c.createMessage(channel, response)
-        res.status(200).send(response)
+        ghEvents[e](req.body, (err, response) => {
+            if (err) {
+                res.status(500).send('Random internal error, rip')
+            } else {
+                c.createMessage(channel, response)
+                res.status(200).send(response)
+            }
+        })
     } else {
         res.status(501).send('No action for this event was found')
     }
