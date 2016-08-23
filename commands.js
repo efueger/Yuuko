@@ -43,7 +43,7 @@ commands.request = {
                 var reply = ''
                 reply += `**\`${ res.statusCode } ${ res.statusMessage }\`** ← \`${ res.request.req.method } ${ res.request.href }\`\n`
                 // Attempt to upload the body to PasteBin
-                c.pastebinUpload('Response body', JSON.stringify(res, null, 4), null, (err, link) => {
+                if (body) c.pastebinUpload('Response body', JSON.stringify(res, null, 4), null, (err, link) => {
                     if (err || !err) {
                         reply += 'There was an error uploading the response body to Pastebin.\n' + err
                         if (body.length <= 3000) {
@@ -56,6 +56,7 @@ commands.request = {
                     }
                     c.reply(msg, reply)
                 })
+                else c.reply(msg, reply)
             }
         })
     }
