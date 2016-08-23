@@ -123,8 +123,8 @@ server.listen(3000)
 console.log('GitHub webhook server running on port 3000.');
 
 // Bot actions
-c.on('ready', () => {
-    console.log('Discord bot connected.');
+c.once('ready', () => {
+    console.log(`Connected to Discord as ${c.user.username}#${c.user.discriminator} / Connected to ${c.guilds.size} guilds`);
 })
 c.on('messageCreate', msg => {
     let prefix = c.getPrefixFromMessage(msg)
