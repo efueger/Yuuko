@@ -1,17 +1,21 @@
 {
   "name": "yuuko",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "",
   "main": "yuuko.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Geo1088",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "chalk": "^1.1.3",
     "eris": "github:abalabahaha/eris#dev",
+    "express": "^4.14.0",
     "merge": "^1.2.0",
+    "pastebin-js": "^0.4.0",
+    "request": "^2.74.0",
     "require-reload": "^0.2.2"
   }
 }

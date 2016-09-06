@@ -1,4 +1,5 @@
 let request = require('request')
+let roll = require('./roll.js')
 
 var commands = {}
 
@@ -69,13 +70,38 @@ commands.npm = {
     process: (c, msg, args) => {
         c.reply(msg, `Looking up package \`${args}\`, please wait...`).then(reply => {
             request(`https://www.npmjs.com/package/${args}`, (err, res) => {
-                if (res.statusCode === 200) {
+                if (res.statusCode === 200 && !err) {
                     c.editMessage(reply.channel.id, reply.id, `https://www.npmjs.com/package/${args}`)
                 } else {
                     c.editMessage(reply.channel.id, reply.id, 'Package not found')
                 }
             })
         })
+    }
+}
+
+commands.roll = {
+    name: 'roll',
+    desc: 'Roll some dice.',
+    usage: '<roll> [roll ...]',
+    process: (c, msg, args) => {
+        function constructMessage (results) {
+            if (!results) return "Invalid roll." // If we can't access the results, the user probably fucked it up
+            if (results.length === 1) { // If there was only one roll, do this
+                let roll = results[0].roll
+                return `**${roll.number}d${roll.sides}** > **__${results[0].total}__**`
+            }
+            // If there were multiple rolls, do this
+            var response = ""
+            for (let result of results) {
+                response += `**${result.roll.number}d${result.roll.sides}** > **__${result.total}__**\n`
+            }
+            return response
+        }
+
+        let results = roll(args)
+        c.reply(msg, constructMessage(results))
+        return "Rolled."
     }
 }
 
@@ -113,6 +139,22 @@ commands.eval = {
     hide: true,
     process: (c, msg, args) => {
         if (c.requireOwner(msg)) c.eval(msg, args)
+    }
+}
+
+commands.setname = {
+    name: 'setname',
+    desc: "Set the bot's username",
+    usage: '<name>',
+    hide: true,
+    process: (c, msg, args) => {
+        if (c.requireOwner(msg)) {
+            c.editSelf({username: args}).then(user => {
+                c.reply(msg, 'Username updated!')
+            }).catch(err => {
+                c.reply(msg, 'There was an error while changing username.')
+            })
+        }
     }
 }
 

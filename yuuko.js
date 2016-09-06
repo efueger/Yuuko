@@ -12,7 +12,7 @@ let Eris = require('eris'),
 let express = require('express'),
     bodyParser = require('body-parser'),
     server = express().use(bodyParser.json())
-let pastebinApi = require("pastebin-js"),
+let pastebinApi = require('pastebin-js'),
     pastebin = new pastebinApi(config.apiKeys.pastebin)
 
 
@@ -25,7 +25,7 @@ c.reloadGhEvents = () => ghEvents = reload('./gh-events.js') // Reload the GitHu
 
 c.requireOwner = (msg) => {
     let result = config.ownerIds.includes(msg.author.id)
-    if (!result) c.reply(msg, "Sorry, gotta be an owner to do that.")
+    if (!result) c.reply(msg, 'Sorry, gotta be an owner to do that.')
     return result
 }
 
@@ -87,11 +87,11 @@ c.pastebinUpload = (title, content, format, callback) => { // Creates a paste; c
 
 c.eval = (msg, code) => { // Eval command - moved here because I don't like having this in the command scope
     // Some eval-specific utilities that I call a lot
-    let guildList = c.guilds.map(guild => `\`${guild.id}\` ${guild.name}`).join('\n')
+    let guildList = c.guilds.map(guild => `\`${guild.id}\` ${guild.name}`).join('\n') // eslint-disable-line no-unused-vars
     // The actual eval now
-    var result;
+    var result
     try {
-        result = eval(code)
+        result = eval(code) // eslint-disable-line no-eval
     } catch (e) {
         result = e
     }
@@ -120,11 +120,11 @@ server.post('/ghweb', (req, res) => {
     }
 })
 server.listen(3000)
-console.log('GitHub webhook server running on port 3000.');
+console.log('GitHub webhook server running on port 3000.')
 
 // Bot actions
 c.once('ready', () => {
-    console.log(`Connected to Discord as ${c.user.username}#${c.user.discriminator} / Connected to ${c.guilds.size} guilds`);
+    console.log(`Connected to Discord as ${c.user.username}#${c.user.discriminator} / Connected to ${c.guilds.size} guilds`)
 })
 c.on('messageCreate', msg => {
     let prefix = c.getPrefixFromMessage(msg)
@@ -133,13 +133,14 @@ c.on('messageCreate', msg => {
         var split = msg.content.substr(prefix.length).split(' ')
         var commandName = split.splice(0, 1)
         var args = split.join(' ')
-        if (!commands[commandName]) return;
+        if (!commands[commandName]) return
         if (msg.channel.guild) {
             console.log(`${ chalk.magenta(msg.channel.guild.name) } ${ chalk.blue(msg.channel.name) } ${ chalk.green(msg.author.username) } ${ msg.content }`)
         } else {
             console.log(`${ chalk.magenta('PM channel') } ${ chalk.green(msg.author.username) } ${ msg.content }`)
         }
-        commands[commandName].process(c, msg, args)
+        let result = commands[commandName].process(c, msg, args)
+        if (result) console.log(`${ chalk.gray('>>>') } ${result}`)
     }
 })
 c.connect()
