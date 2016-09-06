@@ -17,7 +17,7 @@ commands.ping = {
     name: 'ping',
     desc: 'Pings the bot',
     usage: '',
-    process: (c, msg, args) => {
+    process: (c, msg) => {
         c.reply(msg, "I'm here.")
     }
 }
@@ -86,13 +86,13 @@ commands.roll = {
     usage: '<roll> [roll ...]',
     process: (c, msg, args) => {
         function constructMessage (results) {
-            if (!results) return "Invalid roll." // If we can't access the results, the user probably fucked it up
+            if (!results) return 'Invalid roll.' // If we can't access the results, the user probably fucked it up
             if (results.length === 1) { // If there was only one roll, do this
                 let roll = results[0].roll
                 return `**${roll.number}d${roll.sides}** > **__${results[0].total}__**`
             }
             // If there were multiple rolls, do this
-            var response = ""
+            var response = ''
             for (let result of results) {
                 response += `**${result.roll.number}d${result.roll.sides}** > **__${result.total}__**\n`
             }
@@ -101,7 +101,7 @@ commands.roll = {
 
         let results = roll(args)
         c.reply(msg, constructMessage(results))
-        return "Rolled."
+        return 'Rolled.'
     }
 }
 
@@ -110,9 +110,9 @@ commands.prefix = {
     desc: 'Changes the server prefix',
     usage: '<prefix>',
     process: (c, msg, args) => {
-        if (!msg.channel.guild) return c.reply(msg, "Can't use that in PM channels.")
-        if (false) return c.reply(msg, 'kjasdf') // todo: perm check here
-        if (/[a-zA-Z0-9\s\n]/.test(args)) return c.reply(msg, "Prefix cannot contain letters, numbers, newlines, or whitespace.")
+        if (!msg.channel.guild) return c.reply(msg, "Can\'t use that in PM channels.")
+        // if (false) return c.reply(msg, 'kjasdf') // todo: perm check here
+        if (/[a-zA-Z0-9\s\n]/.test(args)) return c.reply(msg, 'Prefix cannot contain letters, numbers, newlines, or whitespace.')
         c.writeGuildConfig(msg.channel.guild.id, {prefix: args})
         c.reply(msg, `Updated prefix to ${args}`)
     }
@@ -123,7 +123,7 @@ commands.reload = {
     desc: 'Reloads all commands. Must be an owner to use this command.',
     usage: '',
     hide: true,
-    process: (c, msg, args) => {
+    process: (c, msg) => {
         if (c.requireOwner(msg)) {
             c.reloadCommands()
             c.reloadGhEvents()
@@ -149,9 +149,9 @@ commands.setname = {
     hide: true,
     process: (c, msg, args) => {
         if (c.requireOwner(msg)) {
-            c.editSelf({username: args}).then(user => {
+            c.editSelf({username: args}).then(() => {
                 c.reply(msg, 'Username updated!')
-            }).catch(err => {
+            }).catch(() => {
                 c.reply(msg, 'There was an error while changing username.')
             })
         }
@@ -166,10 +166,10 @@ commands.setavatar = {
     process: (c, msg, args) => {
         if (c.requireOwner(msg)) {
             // Get the URL of the image
-            let url = args.split(" ")[0] // URL specified in chat
+            let url = args.split(' ')[0] // URL specified in chat
             if (msg.attachments[0]) url = msg.attachments[0].url // URL specified by upload
             url = url.replace(/<([^>]+)>/, '$1') // Allow suppressed URLs
-            if (url === "") return c.reply(msg, 'No image was uploaded or linked.') // Return if no URL
+            if (url === '') return c.reply(msg, 'No image was uploaded or linked.') // Return if no URL
             // Get the image itself by requesting the URL
             request.get({url: url, method: 'GET', encoding: null}, (err, res, body) => {
                 // Handle possible errors
@@ -178,9 +178,9 @@ commands.setavatar = {
                 // Edit the avatar
                 c.editSelf({
                     avatar: `data:${res.headers['content-type']};base64,${body.toString('base64')}`
-                }).then(user => {
+                }).then(() => {
                     c.reply(msg, 'Avatar updated!')
-                }).catch(err => {
+                }).catch(() => {
                     c.reply(msg, 'There was an error while uploading the new avatar.')
                 })
             })

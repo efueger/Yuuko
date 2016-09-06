@@ -37,20 +37,20 @@ events.commit_comment = (body, callback) => {
 }
 
 events.pull_request = (body, callback) => {
-    let user = body.sender.login
-    let repo = body.repository.full_name
-    var action = ''
-    var details = ''
+    // let user = body.sender.login
+    // let repo = body.repository.full_name
+    // var action = ''
+    // var details = ''
 
     switch (body.action) {
         case 'opened':
             shortenUrl(body.pull_request.html_url, (err, url) => {
                 callback(err, `**${body.sender.login} opened pull request #${body.number}** in ${body.repository.full_name}\n${trim(body.pull_request.body)}\n<${url}>`)
             })
-            break;
+            break
         default:
             // Other events are ignored
-            return;
+            return
     }
 }
 
