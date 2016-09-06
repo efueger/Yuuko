@@ -88,13 +88,12 @@ commands.roll = {
         function constructMessage (results) {
             if (!results) return 'Invalid roll.' // If we can't access the results, the user probably fucked it up
             if (results.length === 1) { // If there was only one roll, do this
-                let roll = results[0].roll
-                return `**${roll.number}d${roll.sides}** > **__${results[0].total}__**`
+                return `**\`${results[0].roll.string}\`** > ${results[0].error ? 'Roll was out of range; try something smaller.' : `**${results[0].total}**`}`
             }
             // If there were multiple rolls, do this
             var response = ''
             for (let result of results) {
-                response += `**${result.roll.number}d${result.roll.sides}** > **__${result.total}__**\n`
+                response += `**\`${result.roll.string}\`** > ${result.error ? 'Roll was out of range; try something smaller.' : `**${result.total}**`}\n`
             }
             return response
         }

@@ -1,7 +1,7 @@
 // Generates a random number between 2 values
 // With only 1 argument, generates a number between 1 and a inclusive
 function randomBetween (a, b = 1) {
-    if (a - b > 1000 || b - a > 1000) return a // this is why we can't have nice things
+    if (a - b > 1000 || b - a > 1000) return new Error('Difference between numbers too large.') // this is why we can't have nice things
     if      (a < b) return Math.floor(Math.random() * (b - a + 1)) + a
     else if (a > b) return Math.floor(Math.random() * (a - b + 1)) + b
     /* else a=b  */ return a
@@ -35,20 +35,31 @@ function performRoll (roll) {
     roll.sides = roll.sides === '%' ? 100 : parseInt(roll.sides, 10)
     var individuals = []
 
-    // Roll each die
-    for (var i = 0; i < roll.number; i++) {
-        var thisRoll = randomBetween(roll.sides)
-        individuals.push(thisRoll)
-    }
+    try {
+        // Roll each die
+        for (var i = 0; i < roll.number; i++) {
+            var thisRoll = randomBetween(roll.sides)
+            if (thisRoll instanceof Error) throw thisRoll // If this errored, the roll is out of range
+            individuals.push(thisRoll)
+        }
 
-    // Compute stats and return the results
-    return {
-        roll: roll,
-        total: individuals.reduce((a, b) => a + b, 0),
-        average: individuals.reduce((a, b) => a + b, 0) / individuals.length,
-        individuals: individuals,
-        min: roll.number,
-        max: roll.number * roll.sides
+        // Compute stats and return the results
+        return {
+            roll: roll,
+            total: individuals.reduce((a, b) => a + b, 0),
+            average: individuals.reduce((a, b) => a + b, 0) / individuals.length,
+            individuals: individuals,
+            min: roll.number,
+            max: roll.number * roll.sides
+        }
+    } catch (err) {
+        // There was an error, so return the roll
+        console.log(err)
+        console.log(err.message)
+        return {
+            roll: roll,
+            error: err.message
+        }
     }
 }
 
