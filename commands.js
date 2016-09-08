@@ -87,10 +87,7 @@ commands.roll = {
     process: (c, msg, args) => {
         function constructMessage (results) {
             if (!results) return 'Invalid roll.' // If we can't access the results, the user probably fucked it up
-            if (results.length === 1) { // If there was only one roll, do this
-                return `**\`${results[0].roll.string}\`** > ${results[0].error ? 'Roll was out of range; try something smaller.' : `**${results[0].total}**`}`
-            }
-            // If there were multiple rolls, do this
+            // Loop over each roll
             var response = ''
             for (let result of results) {
                 response += `**\`${result.roll.string}\`** > ${result.error ? 'Roll was out of range; try something smaller.' : `**${result.total}**`}\n`
