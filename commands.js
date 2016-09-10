@@ -82,6 +82,7 @@ commands.npm = {
 
 commands.roll = {
     name: 'roll',
+    aliases: [ 'r' ],
     desc: 'Roll some dice.',
     usage: '<roll> [roll ...]',
     process: (c, msg, args) => {
@@ -183,5 +184,16 @@ commands.setavatar = {
         }
     }
 }
+
+// This is just a generated object of all the aliases mapped to their respective commands
+let aliases = {}
+for (let command of Object.keys(commands)) {
+    if (commands[command].aliases) {
+        for (let alias of commands[command].aliases) {
+            aliases[alias] = command
+        }
+    }
+}
+commands._aliases = aliases
 
 module.exports = commands
