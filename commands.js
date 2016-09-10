@@ -5,6 +5,7 @@ var commands = {}
 
 commands.help = {
     name: 'help',
+    aliases: [ 'h', '?' ],
     desc: 'Gets help for a command. If not passed a command name, gets a list of all commands.',
     usage: '[command]',
     process: (c, msg, args) => {
