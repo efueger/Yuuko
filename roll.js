@@ -1,7 +1,7 @@
 // Generates a random number between 2 values
 // With only 1 argument, generates a number between 1 and a inclusive
 function randomBetween (a, b = 1) {
-    if (a - b > 1000 || b - a > 1000) return new Error('Difference between numbers too large.') // this is why we can't have nice things
+    if (a - b > 999 || b - a > 999) return new Error('Difference between numbers too large.') // this is why we can't have nice things
     if      (a < b) return Math.floor(Math.random() * (b - a + 1)) + a
     else if (a > b) return Math.floor(Math.random() * (a - b + 1)) + b
     /* else a=b  */ return a
@@ -36,6 +36,8 @@ function performRoll (roll) {
     var individuals = []
 
     try {
+        // If it wants too many rolls, go straight to the end
+        if (roll.number > 1000) throw new Error('Too many dice to roll at once.')
         // Roll each die
         for (var i = 0; i < roll.number; i++) {
             var thisRoll = randomBetween(roll.sides)
@@ -54,8 +56,6 @@ function performRoll (roll) {
         }
     } catch (err) {
         // There was an error, so return the roll
-        console.log(err)
-        console.log(err.message)
         return {
             roll: roll,
             error: err.message
