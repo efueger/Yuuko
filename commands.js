@@ -1,7 +1,17 @@
 let request = require('request')
 let roll = require('./roll.js')
+let glob = require('glob')
+let reload = require('require-reload')(require)
 
 var commands = {}
+
+// Load custom commands from the commands directory
+let commandFiles = glob.sync('commands/*.js')
+for (let filename of commandFiles) {
+    let thisCommand = reload(`./${filename}`)
+    if (thisCommand.name && thisCommand.process)
+    commands[thisCommand.name] = thisCommand
+}
 
 commands.help = {
     name: 'help',
@@ -11,15 +21,6 @@ commands.help = {
     process: (c, msg, args) => {
         let response = c.getCommandHelp(msg, args)
         c.reply(msg, response)
-    }
-}
-
-commands.ping = {
-    name: 'ping',
-    desc: 'Pings the bot',
-    usage: '',
-    process: (c, msg) => {
-        c.reply(msg, "I'm here.")
     }
 }
 
