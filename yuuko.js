@@ -83,6 +83,7 @@ c.getCommandHelp = (msg, commandName) => {
         // Return a list of all commands
         var list = Object.keys(commands)
             .filter(c => !commands[c].hide) // Hide commands from the list if their hide attribute is set
+            .filter(c => !(c==='_aliases')) // The aliases map doesn't count
             .map(c => '`' + prefix + c + '`')
             .join(', ')
         list = `**Command list:**\n${list}\n*Use \`${prefix}help [command]\` for more info about that command.*`
