@@ -43,6 +43,9 @@ c.requireOwner = (msg) => {
 // Get the computed config of a guild by merging its local config with the global defaults
 c.getGuildConfig = guildId => merge(config.guildDefaults, guilds[guildId] || {})
 
+// Get the raw config of a guild for modification
+c.rawGuildConfig = guildId => guilds[guildId] || {}
+
 // Updates a guild's local config with the specified options
 c.writeGuildConfig = (guildId, options) => {
     // Compute new config
