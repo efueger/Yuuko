@@ -1,7 +1,7 @@
 let roll = require('../roll.js')
 
 module.exports = {
-    _name: 'roll',
+    name: 'roll',
     aliases: [ 'r' ],
     desc: 'Roll some dice.',
     usage: '<roll> [roll ...]',
