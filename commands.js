@@ -15,7 +15,7 @@ for (let filename of commandFiles) {
 
 commands.help = {
     name: 'help',
-    aliases: [ 'h', '?' ],
+    aliases: [ 'h', '?', 'halp' ],
     desc: 'Gets help for a command. If not passed a command name, gets a list of all commands.',
     usage: '[command]',
     process: (c, msg, args) => {
