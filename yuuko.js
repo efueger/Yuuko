@@ -71,8 +71,13 @@ c.getPrefixFromMessage = msg => {
 
 c.getCommandHelp = (msg, commandName) => {
     // Get a formatted help message for a command
+
+    // Parsing stuff
     let prefix = c.getPrefixFromMessage(msg)
     if (commandName.startsWith(prefix)) commandName = commandName.substr(prefix.length)
+
+    // Alias processing
+    commandName = commands._aliases[commandName] || commandName
     let command = commands[commandName]
     if (!command) {
         // Return a list of all commands
@@ -80,7 +85,7 @@ c.getCommandHelp = (msg, commandName) => {
             .filter(c => !commands[c].hide) // Hide commands from the list if their hide attribute is set
             .map(c => '`' + prefix + c + '`')
             .join(', ')
-        list = `**Command list:**\n${list}\n*Use ${prefix}help <command> for more info about that command.*`
+        list = `**Command list:**\n${list}\n*Use \`${prefix}help [command]\` for more info about that command.*`
         return list
     } else {
         // Return help for this specific command
@@ -88,6 +93,7 @@ c.getCommandHelp = (msg, commandName) => {
         response += `**Command help: \`${prefix + command.name}\`**\n`
         response += `**Description:** ${command.desc || '*No description provided.*'}\n`
         response += `**Usage:** \`${prefix + commandName} ${command.usage}\`\n`
+        response += command.aliases ? `**Aliases:** ${command.aliases.map(a=>'`'+prefix+a+'`').join(', ')}` : ''
         return response
     }
 }
@@ -179,7 +185,7 @@ c.on('messageCreate', msg => {
 
     // Fancy logs
     if (msg.channel.guild) {
-        console.log(`${chalk.magenta(msg.channel.guild.name)} ${chalk.blue(msg.channel.name)} ${chalk.green(msg.author.username)} ${msg.content}`)
+        console.log(`${chalk.magenta(msg.channel.guild.name)} \u00BB ${chalk.blue(msg.channel.name)} \u00BB ${chalk.green(msg.author.username)} ${msg.content}`)
     } else {
         console.log(`${chalk.magenta('PM channel')} ${chalk.green(msg.author.username)} ${msg.content}`)
     }
