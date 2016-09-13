@@ -90,6 +90,7 @@ c.getCommandHelp = (msg, commandName) => {
             .map(c => '`' + prefix + c + '`')
             .join(', ')
         list = `**Command list:**\n${list}\n*Use \`${prefix}help [command]\` for more info about that command.*`
+        list += '\nYuuko is very, *very* work-in-progress. If you want to check out her source or help out, check out the GitHub repo: <https://github.com/Geo1088/Yuuko>'
         return list
     } else {
         // Return help for this specific command
