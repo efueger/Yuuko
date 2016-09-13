@@ -8,9 +8,19 @@ var commands = {}
 // Load custom commands from the commands directory
 let commandFiles = glob.sync('commands/*.js')
 for (let filename of commandFiles) {
-    let thisCommand = reload(`./${filename}`)
-    if (thisCommand.name && thisCommand.process)
-    commands[thisCommand.name] = thisCommand
+    try {
+        // Load up the file
+        let thisCommand = reload(`./${filename}`)
+
+        // If the loaded command has no name or process, throw, since those are required
+        if (!(thisCommand.name && thisCommand.process)) throw new Error('Missing name or process')
+
+        // Set the command up to be exported if nothing bad happened
+        commands[thisCommand.name] = thisCommand
+    } catch (e) {
+        // Log the error; don't add the command to be exported
+        console.log(`Error while loading command from ${filename}:\n${e}`)
+    }
 }
 
 commands.help = {
@@ -21,86 +31,6 @@ commands.help = {
     process: (c, msg, args) => {
         let response = c.getCommandHelp(msg, args)
         c.reply(msg, response)
-    }
-}
-
-commands.request = {
-    name: 'request',
-    desc: 'Requests a URL and returns the response',
-    usage: '[method] <uri>',
-    process: (c, msg, args) => {
-        // Get the arguments - the request URI and method
-        if (!args) return c.reply(msg, '**Request failed.**\n Error: No URI specified')
-        args = args.split(' ')
-        var uri = args[1] ? args[1] : args[0]
-        uri = uri.replace(/<([^>]+)>/, '$1') // Allow suppressed links
-        var method = args[1] ? args[0] : 'get'
-        console.log(method)
-        method = method.toUppercase
-
-        // Perform the request
-        request({uri: uri, method: method}, (err, res, body) => {
-            if (err) {
-                c.reply(msg, '**Request failed.**\n' + err)
-            } else {
-                var reply = ''
-                reply += `**\`${ res.statusCode } ${ res.statusMessage }\`** ← \`${ res.request.req.method } ${ res.request.href }\`\n`
-                // Attempt to upload the body to PasteBin
-                if (body) c.pastebinUpload('Response body', JSON.stringify(res, null, 4), null, (err, link) => {
-                    if (err || !err) {
-                        reply += 'There was an error uploading the response body to Pastebin.\n' + err
-                        if (body.length <= 3000) {
-                            reply += '\nBody:\n' + body
-                        } else {
-                            reply += '\nThe body is too long to fit in a message.'
-                        }
-                    } else {
-                        reply += `Body paste: <${ link }>`
-                    }
-                    c.reply(msg, reply)
-                })
-                else c.reply(msg, reply)
-            }
-        })
-    }
-}
-
-commands.npm = {
-    name: 'npm',
-    desc: 'Looks up a package on NPM.',
-    usage: '<package>',
-    process: (c, msg, args) => {
-        c.reply(msg, `Looking up package \`${args}\`, please wait...`).then(reply => {
-            request(`https://www.npmjs.com/package/${args}`, (err, res) => {
-                if (res.statusCode === 200 && !err) {
-                    c.editMessage(reply.channel.id, reply.id, `https://www.npmjs.com/package/${args}`)
-                } else {
-                    c.editMessage(reply.channel.id, reply.id, 'Package not found')
-                }
-            })
-        })
-    }
-}
-
-commands.roll = {
-    name: 'roll',
-    aliases: [ 'r' ],
-    desc: 'Roll some dice.',
-    usage: '<roll> [roll ...]',
-    process: (c, msg, args) => {
-        function constructMessage (results) {
-            if (!results) return 'Invalid roll.' // If we can't access the results, the user probably fucked it up
-            // Loop over each roll
-            var response = ''
-            for (let result of results) {
-                response += `**\`${result.roll.string}\`** > ${result.error ? 'Roll was out of range; try something smaller.' : `**${result.total}**`}\n`
-            }
-            return response
-        }
-
-        let results = roll(args)
-        c.reply(msg, constructMessage(results))
-        return 'Rolled.'
     }
 }
 
